@@ -201,7 +201,6 @@
 
 (defrule covid
 	(not (fin ?))
-	(not (test_antigenos ?))
 	?persona <- (persona(tarjeta_sanitaria ?tarjeta_sanitaria))
 	(and (persona (covid n))  (or (persona (fiebre s)) (persona (tos s)) (persona (cansancio s)) (persona (contacto+ s)) ))
 	=>
@@ -219,14 +218,12 @@
 		)
 	)
 	(modify ?persona (covid ?covid))
-	(assert (test_antigenos ?test_antigenos))
 	(assert (fin))
 )
 
 
 (defrule gripe
 	(not (fin ?))
-	(test_antigenos n)
 	?persona <- (persona(tarjeta_sanitaria ?tarjeta_sanitaria))
 	(and (persona (covid n))  (or (persona (fiebre s)) (persona (tos s)) (persona (cansancio s)) (persona (contacto+ s)) ))
 	=>
@@ -235,6 +232,16 @@
 	(assert (fin))
 )
 
+(defrule no-sintomas
+	(not (fin ?))
+	?persona <- (persona(tarjeta_sanitaria ?tarjeta_sanitaria))
+	(and (persona (covid n))(persona (fiebre n)) (persona (tos n)) (persona (cansancio n)) (persona (contacto+ n)))
+	=>
+	(assert (fin))
+	(printout t crlf "No presenta ningún síntoma" crlf)
+)
+
+
 ;;;;;;;;;;;;;;;--------------------------------------------------------------------------
 ;;;;;;;;;;;;;;;                             Continuación del programa
 ;;;;;;;;;;;;;;;--------------------------------------------------------------------------
@@ -242,19 +249,19 @@
 (defrule continuar
 	(fin)
 	?f1 <- (fin)
-	?f2 <- (test_antigenos ?test_antigenos)
-	?f3 <- (fiebre ?fiebre)
-	?f4 <- (ts ?ts)
-	?f5 <- (tos ?tos)
-	?f6 <- (cansancio ?cansancio)
-	?f7 <- (contacto+ ?contacto+)
-	?f8 <- (inicio)
+	?f2 <- (fiebre ?fiebre)
+	?f3 <- (ts ?ts)
+	?f4 <- (tos ?tos)
+	?f5 <- (cansancio ?cansancio)
+	?f6 <- (contacto+ ?contacto+)
+	?f7 <- (inicio)
 	=>
 	(printout t crlf "Hay más pacientes?" crlf)
 	(printout t "Respuesta: ")
 	(bind ?continue (lowcase (read)))
 	(if (eq ?continue si) then
-		(retract ?f1 ?f2 ?f3 ?f4 ?f5 ?f6 ?f7 ?f8)
+		(retract ?f1 ?f2 ?f3 ?f4 ?f5 ?f6 ?f7)
 		(assert(inicio))
+	else (halt)
 )
 )
